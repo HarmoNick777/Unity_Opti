@@ -19,21 +19,19 @@ public class MoveToClickPoint : MonoBehaviour
                 {
                     GetComponent<NavMeshAgent>().destination = hit.point;
                     GetComponent<NavMeshAgent>().isStopped = false;
-                    Debug.Log("Player destination have been changed !");
-
+                    Debug.Log("Player destination has been changed !");
                 }
-
             }
         }
 
         //on vérifie si le player est arrivé à destination
-        if (Vector3.Distance(transform.position , GetComponent<NavMeshAgent>().destination) < 0.1f)
+        if (Vector3.Distance(transform.position , GetComponent<NavMeshAgent>().destination) < 0.1f && GetComponent<NavMeshAgent>().velocity.magnitude > 0.01f)
         {
             // toujours la vérif de la présence du component pour éviter la nullreference
             if (GetComponent<NavMeshAgent>() != null)
             {
                 GetComponent<NavMeshAgent>().isStopped = true;
-                Debug.Log("Player reach is destination !");
+                Debug.Log("Player reached their destination!");
             }
         }
 
@@ -42,13 +40,12 @@ public class MoveToClickPoint : MonoBehaviour
         if (GetComponent<NavMeshAgent>() != null && GetComponent<NavMeshAgent>().velocity.magnitude > .1f)
         {
             GetComponentInChildren<Animator>().SetBool("running", true);
-            Debug.Log("start walking");
+            Debug.Log("Starts running"); // était Starts walking alors que le player court toujorus et ne marche jamais
         }
         else
         {
             GetComponentInChildren<Animator>().SetBool("running", false);
-            Debug.Log("start running");
-
+            //Debug.Log("Starts running"); // N'a aucun sens de dire qu'il court, puisque cette condition s'applique même quand le player est arrêté
         }
 
     }

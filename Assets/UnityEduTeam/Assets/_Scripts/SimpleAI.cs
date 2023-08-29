@@ -7,18 +7,19 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(NavMeshAgent))]
 public class SimpleAI : MonoBehaviour {
     [Header("Agent Field of View Properties")]
-    public float viewRadius;
-    public float viewAngle;
+    [SerializeField] float viewRadius;
+    [SerializeField] float viewAngle;
 
-    public LayerMask playerMask;
-    public LayerMask obstacleMask;
+    [SerializeField] LayerMask playerMask;
+    [SerializeField] LayerMask obstacleMask;
 
     [Space(5)]
     [Header("Agent Properties")]
-    public float runSpeed;
-    public float walkSpeed;
-    public float patrolRadius;
+    [SerializeField] float runSpeed;
+    [SerializeField] float walkSpeed;
+    [SerializeField] float patrolRadius;
 
+    private GameObject[] players;
 
     private Transform playerTarget;
 
@@ -33,6 +34,7 @@ public class SimpleAI : MonoBehaviour {
     void Start () {
         currentDestination = RandomNavSphere(transform.position, patrolRadius, -1);
         maxNumberOfNewDestinationBeforeDeath = Random.Range(5, 50);
+        players = GameObject.FindGameObjectsWithTag("Player");
     }
 
     private void CheckState()
@@ -69,7 +71,6 @@ public class SimpleAI : MonoBehaviour {
                 Destroy(gameObject);
             }
         }
-
     }
 
     void ChaseBehavior()
@@ -102,25 +103,25 @@ public class SimpleAI : MonoBehaviour {
         playerTarget = null;
         playerSeen = false;
         
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        //GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        
         if (players.Length == 0)
         {
             return;
         }
-        else
+        /*else
         {
             Debug.Log("Found Player");
-        }
+        }*/
 
-        foreach (GameObject player in players)
+        //foreach (GameObject player in players)
+        for (int i=0; i<players.Length; i++)
         {
-            Vector3 dirToTarget = (player.transform.position - transform.position).normalized;
+            Vector3 dirToTarget = (players[i].transform.position - transform.position).normalized;
             RaycastHit hit;
             if (Physics.Raycast(transform.position, dirToTarget, out hit))
             {
-                float dstToTarget = Vector3.Distance(transform.position, player.transform.position);
+                float dstToTarget = Vector3.Distance(transform.position, players[i].transform.position);
                 if (dstToTarget <= viewRadius)
                 {
                     if (Vector3.Angle(transform.forward, dirToTarget) <= viewAngle / 2)
@@ -161,25 +162,26 @@ public class SimpleAI : MonoBehaviour {
 
     #endregion
 
-    private bool HasFindPlayer()
+    private bool HasFoundPlayer()
     {
         bool result = false;
         
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        //GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
         if (players.Length == 0)
         {
             return result;
         }
-        else
+        /*else
         {
             Debug.Log("Found Player");
-        }
+        }*/
 
         
-        foreach (GameObject player in players)
+        //foreach (GameObject player in players)
+        for(int i=0; i<players.Length; i++)
         {
-            if (Vector3.Distance(player.transform.position, transform.position) <= GetComponent<NavMeshAgent>().radius*2)
+            if (Vector3.Distance(players[i].transform.position, transform.position) <= GetComponent<NavMeshAgent>().radius*2)
             {
                 result = true;
             }
@@ -200,7 +202,7 @@ public class SimpleAI : MonoBehaviour {
             currentState = State.Wandering;
         }
 
-        if (HasFindPlayer())
+        if (HasFoundPlayer())
         {
             SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
         }

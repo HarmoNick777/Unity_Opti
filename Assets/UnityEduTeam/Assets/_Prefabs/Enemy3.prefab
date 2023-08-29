@@ -624,6 +624,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a44a3d9504b283d4b82a5cf468dd22ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  players:
+  - {fileID: 81097338255461931, guid: e3e12d13380a3fa45a2c378f6a3d0ab3, type: 3}
   viewRadius: 10
   viewAngle: 90
   playerMask:
@@ -1278,7 +1280,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &95442487871287428
 Animator:
-  serializedVersion: 5
+  serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1295,8 +1297,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1405042592930548
 GameObject:
   m_ObjectHideFlags: 0
