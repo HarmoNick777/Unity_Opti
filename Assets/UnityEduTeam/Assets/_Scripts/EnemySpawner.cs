@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public List<GameObject> EnemyPrefabs;
+    [SerializeField] List<GameObject> EnemyPrefabs;
+    private GameObject[] enemySpawnPoints;
     
     void Start()
     {
-        for (int i = 0; i < GameObject.FindGameObjectsWithTag("EnemySpawnPoint").Length; i++)
+        enemySpawnPoints = GameObject.FindGameObjectsWithTag("EnemySpawnPoint");
+
+        for (int i = 0; i < enemySpawnPoints.Length; i++)
         {
-            Instantiate(EnemyPrefabs[Random.Range(0, EnemyPrefabs.Count)],
-                GameObject.FindGameObjectsWithTag("EnemySpawnPoint")[i].transform.position,
-                GameObject.FindGameObjectsWithTag("EnemySpawnPoint")[i].transform.rotation);
+            Instantiate(EnemyPrefabs[Random.Range(0, EnemyPrefabs.Count)], enemySpawnPoints[i].transform.position, enemySpawnPoints[i].transform.rotation);
         }
     }
 
@@ -21,13 +22,13 @@ public class EnemySpawner : MonoBehaviour
     {
         // vérification si un enemy est mort et le cas échéant en faire spawn un nouveau à une position aléatoire
         // pour cela on compare le nombre théorique d'enemy avec le nombre actuel
-        while (GameObject.FindGameObjectsWithTag("EnemySpawnPoint").Length >
+        while (enemySpawnPoints.Length >
                GameObject.FindGameObjectsWithTag("Enemy").Length)
         {
             int RandomNumber = Random.Range(0, EnemyPrefabs.Count);
             Instantiate(EnemyPrefabs[Random.Range(0, EnemyPrefabs.Count)],
-                GameObject.FindGameObjectsWithTag("EnemySpawnPoint")[RandomNumber].transform.position,
-                GameObject.FindGameObjectsWithTag("EnemySpawnPoint")[RandomNumber].transform.rotation);
+                enemySpawnPoints[RandomNumber].transform.position,
+                enemySpawnPoints[RandomNumber].transform.rotation);
         }
     }
 }
