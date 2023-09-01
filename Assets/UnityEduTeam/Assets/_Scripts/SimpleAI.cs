@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class SimpleAI : MonoBehaviour {
+    [SerializeField] Pool enemyPool;
+    
+    [Space(5)]
     [Header("Agent Field of View Properties")]
     [SerializeField] float viewRadius;
     [SerializeField] float viewAngle;
@@ -25,6 +28,9 @@ public class SimpleAI : MonoBehaviour {
 
     private Vector3 currentDestination;
 
+    private NavMeshAgent navMeshAgent;
+    private Animator animator;
+
     private bool playerSeen;
     private int maxNumberOfNewDestinationBeforeDeath;
     private enum State {Wandering, Chasing};
@@ -35,6 +41,8 @@ public class SimpleAI : MonoBehaviour {
         currentDestination = RandomNavSphere(transform.position, patrolRadius, -1);
         maxNumberOfNewDestinationBeforeDeath = Random.Range(5, 50);
         players = GameObject.FindGameObjectsWithTag("Player");
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     private void CheckState()
@@ -50,21 +58,20 @@ public class SimpleAI : MonoBehaviour {
             default:
                 WanderBehavior();
                 break;
-
         }
     }
 
     void WanderBehavior()
     {
-        GetComponentInChildren<Animator>().SetTrigger("walk");
-        GetComponent<NavMeshAgent>().speed = walkSpeed;
+        animator.SetTrigger("walk");
+        navMeshAgent.speed = walkSpeed;
 
-        float dist = GetComponent<NavMeshAgent>().remainingDistance;
+        float dist = navMeshAgent.remainingDistance;
 
-        if (dist != Mathf.Infinity && GetComponent<NavMeshAgent>().pathStatus == NavMeshPathStatus.PathComplete)
+        if (dist != Mathf.Infinity && navMeshAgent.pathStatus == NavMeshPathStatus.PathComplete)
         {
             currentDestination = RandomNavSphere(transform.position, patrolRadius, -1);
-            GetComponent<NavMeshAgent>().SetDestination(currentDestination);
+            navMeshAgent.SetDestination(currentDestination);
             maxNumberOfNewDestinationBeforeDeath--;
             if (maxNumberOfNewDestinationBeforeDeath <= 0)
             {
@@ -77,10 +84,10 @@ public class SimpleAI : MonoBehaviour {
     {
         if (playerTarget != null)
         {
-            GetComponentInChildren<Animator>().SetTrigger("run");
-            GetComponent<NavMeshAgent>().speed = runSpeed;
+            animator.SetTrigger("run");
+            navMeshAgent.speed = runSpeed;
             currentDestination = playerTarget.transform.position;
-            GetComponent<NavMeshAgent>().SetDestination(currentDestination);
+            navMeshAgent.SetDestination(currentDestination);
         }
         else
         {
@@ -89,13 +96,6 @@ public class SimpleAI : MonoBehaviour {
         }
     }
 
-    // private void OnTriggerEnter(Collider other)
-    // {
-    //     if (other.tag == "Player")
-    //     {
-    //     }
-    // }
-
     #region Vision
     void FindVisibleTargets()
     {
@@ -103,25 +103,32 @@ public class SimpleAI : MonoBehaviour {
         playerTarget = null;
         playerSeen = false;
         
-        //GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
         if (players.Length == 0)
         {
             return;
         }
-        /*else
-        {
-            Debug.Log("Found Player");
-        }*/
-
-        //foreach (GameObject player in players)
+        
         for (int i=0; i<players.Length; i++)
         {
+            float dstToTarget = Vector3.Distance(transform.position, players[i].transform.position);
             Vector3 dirToTarget = (players[i].transform.position - transform.position).normalized;
-            RaycastHit hit;
+            if(dstToTarget <= viewRadius && Vector3.Angle(transform.forward, dirToTarget) <= viewAngle / 2)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, dirToTarget, out hit))
+                {
+                    if (hit.collider.tag == "Player")
+                    {
+                        playerSeen = true;
+                        playerTarget = hit.transform;
+                    }
+                }
+            }
+
+            /*RaycastHit hit;
             if (Physics.Raycast(transform.position, dirToTarget, out hit))
             {
-                float dstToTarget = Vector3.Distance(transform.position, players[i].transform.position);
+                //float dstToTarget = Vector3.Distance(transform.position, players[i].transform.position);
                 if (dstToTarget <= viewRadius)
                 {
                     if (Vector3.Angle(transform.forward, dirToTarget) <= viewAngle / 2)
@@ -133,7 +140,7 @@ public class SimpleAI : MonoBehaviour {
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 
@@ -166,22 +173,14 @@ public class SimpleAI : MonoBehaviour {
     {
         bool result = false;
         
-        //GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
         if (players.Length == 0)
         {
             return result;
         }
-        /*else
-        {
-            Debug.Log("Found Player");
-        }*/
-
         
-        //foreach (GameObject player in players)
         for(int i=0; i<players.Length; i++)
         {
-            if (Vector3.Distance(players[i].transform.position, transform.position) <= GetComponent<NavMeshAgent>().radius*2)
+            if (Vector3.Distance(players[i].transform.position, transform.position) <= navMeshAgent.radius*2)
             {
                 result = true;
             }
@@ -190,7 +189,6 @@ public class SimpleAI : MonoBehaviour {
         return result;
     }
     
-    // Update is called once per frame
     void Update () {
         CheckState();
 
